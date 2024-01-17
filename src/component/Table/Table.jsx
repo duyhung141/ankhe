@@ -1,24 +1,36 @@
-import React from "react"
+import React from "react";
+import classNames from "classnames";
 
 function Table(props) {
-    const headers = props.headers
-    const datas = props.datas
-    const colorHeader= props.colorHeader
-    return(
+    const { headers, datas, colorHeader } = props;
+
+    const headingClass = classNames({
+        [`bg-[${colorHeader}]`]: true,
+        [`text-[${colorHeader}]`]: true,
+    });
+    return (
         <>
             <table className="">
-                <thead className={`bg-[#${colorHeader}]/20 text-[#${colorHeader}]`}>
-                    <tr>
-                        {headers.map((header, index) => (
-                            <th key={index} className="border border-gray-400 px-4 py-2">{header}</th>
-                        ))}
-                    </tr>
+                <thead className={headingClass}>
+                <tr>
+                    {headers.map((header, index) => (
+                        <th key={index} className="border border-gray-400 px-4 py-2">
+                            {header}
+                        </th>
+                    ))}
+                </tr>
                 </thead>
                 <tbody>
                 {datas.map((data, index) => (
-                    <tr key={index} className="hover:bg-gray-100 hover:cursor-pointer">
+                    <tr
+                        key={index}
+                        className="hover:bg-gray-100 hover:cursor-pointer"
+                    >
                         {Object.values(data).map((item, index) => (
-                            <td key={index} className="border border-gray-400 px-4 py-2 ">
+                            <td
+                                key={index}
+                                className="border border-gray-400 px-4 py-2"
+                            >
                                 {item}
                             </td>
                         ))}
@@ -27,7 +39,7 @@ function Table(props) {
                 </tbody>
             </table>
         </>
-    )
+    );
 }
 
-export default Table
+export default Table;
