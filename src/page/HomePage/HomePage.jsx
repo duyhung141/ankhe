@@ -3,7 +3,8 @@ import Table from "../../component/Table/Table";
 import image1 from "../../assets/img/image 1.png"
 import image2 from "../../assets/img/image 2.png"
 import Input from "../../component/Input/Input";
-import Button from "../../component/Button/Button";
+import Result from "../../component/Result/Result";
+import * as PredictService from "../../service/PredictService";
 
 function HomePage() {
     const headers1 = [
@@ -54,8 +55,30 @@ function HomePage() {
             "Lưu lượng đến hồ An Khê (m3/s)": "0.00",
         },
     ]
+    const [luuLuongXaKanak, setLuuLuongXaKanak] = React.useState("");
+    const [soLieuMuaGiuaKanakAnKhe, setSoLieuMuaGiuaKanakAnKhe] = React.useState("");
+    const [luuLuongNuocDenHoAnKhe, setLuuLuongNuocDenHoAnKhe] = React.useState("");
 
-    const [importExcel, setImportExcel] = React.useState(false)
+    const [importExcel, setImportExcel] = React.useState(null)
+    const [file, setFile] = React.useState(null);
+    const [result, setResult] = React.useState(null)
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        setFile(selectedFile);
+    };
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        let data = {}
+        if (importExcel && file) {
+            // handle import excel
+            data = await PredictService.predict_xlsx(file);
+        } else {
+            // handle input
+            data = await PredictService.predict(luuLuongXaKanak, soLieuMuaGiuaKanakAnKhe, luuLuongNuocDenHoAnKhe)
+        }
+        setResult(data)
+    }
     return (
         <>
             <div className="container mx-auto p-6">
@@ -88,12 +111,40 @@ function HomePage() {
                         Khê</h3>
                     <div className="mt-2 text-center border h-screen px-12 py-8">
                         <div className="grid gap-5 md:grid-cols-2 md:gap-8 w-fit mx-auto">
-                            <Input label={"Tổng lưu lượng xả Kanak thời điểm t (m3)"}
-                                   placeholder={"Lưu lượng xả Kanak"}/>
-                            <Input label={"Số liệu mưa giữa Kanak - An Khê tại thời điểm t (m3)"}
-                                   placeholder={"Số liệu mưa giữa Kanak - An Khê"}/>
-                            <Input label={"Lưu lượng nước đến hồ An Khê tại thời điểm t"}
-                                   placeholder={"Lưu lượng nước đến hồ An Khê"}/>
+                            <div className="flex flex-col">
+                                <label className="text-start font-semibold">
+                                    Tổng lưu lượng xả Kanak thời điểm t (m3) <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    className="font-semibold px-4 py-2 rounded border-2"
+                                    placeholder={"Lưu lượng xả Kanak"}
+                                    value={luuLuongXaKanak}
+                                    onChange={(e) => setLuuLuongXaKanak(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-start font-semibold">
+                                    Số liệu mưa giữa Kanak - An Khê tại thời điểm t (m3) <span
+                                    className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    className="font-semibold px-4 py-2 rounded border-2"
+                                    placeholder={"Số liệu mưa giữa Kanak - An Khê"}
+                                    value={soLieuMuaGiuaKanakAnKhe}
+                                    onChange={(e) => setSoLieuMuaGiuaKanakAnKhe(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-start font-semibold">
+                                    Lưu lượng nước đến hồ An Khê tại thời điểm t <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    className="font-semibold px-4 py-2 rounded border-2"
+                                    placeholder={"Lưu lượng nước đến hồ An Khê"}
+                                    value={luuLuongNuocDenHoAnKhe}
+                                    onChange={(e) => setLuuLuongNuocDenHoAnKhe(e.target.value)}
+                                />
+                            </div>
                         </div>
 
                         <div className="mt-5">
@@ -118,22 +169,25 @@ function HomePage() {
                                         className="mx-auto block text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                                         type="file"
                                         accept=".xlsx || .csv"
+                                        onChange={handleFileChange}
                                     />
-                                    {/*<button*/}
-                                    {/*    className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"*/}
-                                    {/*>*/}
-                                    {/*    IMPORT*/}
-                                    {/*</button>*/}
                                 </div>
 
                             </>
                         )}
                         <div className="mt-5">
-                            <Button content={"Dự đoán"}/>
+                            <button
+                                onClick={(e) => handleSubmit(e)}
+                                className="bg-[#6EE7B7] font-semibold px-6 py-4 rounded hover:bg-[#10b981] focus:border-2 focus:border-[#10b981]">Dự
+                                đoán
+                            </button>
                         </div>
+                        {
+                            result && <Result data={result.data}/>
+                        }
+
                     </div>
                 </div>
-
             </div>
         </>
     )
