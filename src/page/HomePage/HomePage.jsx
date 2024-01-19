@@ -20,6 +20,22 @@ function HomePage() {
         "Số cửa xả sâu",
         "Số cửa xả mặt"
     ]
+
+    const headers2 = [
+        "Thời điểm",
+        "Lưu lượng đến hồ An Khê (m3/s)",
+    ]
+
+    const headerExcel = [
+        "Tổng lưu lượng xả Kanak thời điểm t (m3)",
+        "Số liệu mưa giữa Kanak - An Khê tại thời điểm t (m3)",
+        "Lưu lượng nước đến hồ An Khê thời điểm t (m3)",
+        "Thời điểm t + 2",
+        "Thời điểm t + 4",
+        "Thời điểm t + 6",
+        "Thời điểm t + 12",
+    ]
+
     const datas1 = [
         {
             "Tên hồ": "Kanak",
@@ -36,11 +52,7 @@ function HomePage() {
 
         },
     ]
-    const headers2 = [
-        "Thời điểm",
-        "Lưu lượng đến hồ An Khê (m3/s)",
 
-    ]
     const datas2 = [
         {
             "Thời điểm": "2021-09-09 00:00:00",
@@ -71,8 +83,18 @@ function HomePage() {
         e.preventDefault()
         let data = {}
         if (importExcel && file) {
+            const fileType=file.type
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('fileName', file.name);
+            if (fileType == "text/csv") {
+                data = await PredictService.predict_csv(formData);
+
+            }
             // handle import excel
-            data = await PredictService.predict_xlsx(file);
+            else {
+                data = await PredictService.predict_xlsx(formData);
+            }
         } else {
             // handle input
             data = await PredictService.predict(luuLuongXaKanak, soLieuMuaGiuaKanakAnKhe, luuLuongNuocDenHoAnKhe)
@@ -85,13 +107,15 @@ function HomePage() {
                 <div className="">
                     <h3 className="text-start text-lg text-[#0891B2] font-medium py-1 md:text-3xl md:py-2">Thông tin vận
                         hành hồ chứa An Khê - Kanak</h3>
-                    <Table headers={headers1} datas={datas1} colorHeader={"#0d9488"}/>
+                    <p>Đang cập nhật ...</p>
+                    {/*<Table headers={headers1} datas={datas1} colorHeader={"#0d9488"}/>*/}
                 </div>
 
                 <div className="mt-10">
                     <h3 className="text-start text-lg text-[#0891B2] font-medium py-1 md:text-3xl md:py-2">Dự báo lưu
                         lượng nước đến hồ chứa An Khê </h3>
-                    <Table headers={headers2} datas={datas2} colorHeader={"#059669"}/>
+                    <p>Đang cập nhật ...</p>
+                    {/*<Table headers={headers2} datas={datas2} colorHeader={"#059669"}/>*/}
                 </div>
 
                 <div className="">
@@ -175,7 +199,7 @@ function HomePage() {
 
                             </>
                         )}
-                        <div className="mt-5">
+                        <div className="my-5">
                             <button
                                 onClick={(e) => handleSubmit(e)}
                                 className="bg-[#6EE7B7] font-semibold px-6 py-4 rounded hover:bg-[#10b981] focus:border-2 focus:border-[#10b981]">Dự
@@ -183,7 +207,9 @@ function HomePage() {
                             </button>
                         </div>
                         {
-                            result && <Result data={result.data}/>
+                            importExcel?
+                                (result  && <Table headers={headerExcel} datas={result}/>):
+                                (result && <Result data={result.data}/>)
                         }
 
                     </div>

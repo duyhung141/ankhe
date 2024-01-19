@@ -5,9 +5,30 @@ export const predict = async (x1, x2, x3) => {
     return res
 }
 
-export const predict_xlsx = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await axios.post(`http://127.0.0.1:5000/predict_excel`, formData);
-    return res
+export const predict_xlsx = async (formData) => {
+    try {
+        const res = await axios.post(`http://127.0.0.1:5000/predict_excel`, formData,{
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error('Error predicting with file:', error);
+        throw error;
+    }
+}
+
+export const predict_csv = async (formData) => {
+    try {
+        const res = await axios.post(`http://127.0.0.1:5000/predict_csv`, formData,{
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error('Error predicting with file:', error);
+        throw error;
+    }
 }
