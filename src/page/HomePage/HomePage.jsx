@@ -74,32 +74,53 @@ function HomePage() {
     const [importExcel, setImportExcel] = React.useState(null)
     const [file, setFile] = React.useState(null);
     const [result, setResult] = React.useState(null)
-
+    const [warning, setWarning] = React.useState(false)
+    const handleWarning = () => {
+        console.log(warning)
+        if (importExcel) {
+            setWarning(false)
+            if (!file) {
+                setWarning(true)
+                alert("Bạn chưa chọn file excel")
+            }
+        } else {
+            setWarning(false)
+            if (!luuLuongXaKanak || !soLieuMuaGiuaKanakAnKhe || !luuLuongNuocDenHoAnKhe) {
+                console.log('vào đây', importExcel)
+                setWarning(true)
+                alert("Bạn chưa nhập đủ thông tin")
+            }
+        }
+    }
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         setFile(selectedFile);
     };
     const handleSubmit = async (e) => {
         e.preventDefault()
+        handleWarning()
         let data = {}
-        if (importExcel && file) {
-            const fileType=file.type
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('fileName', file.name);
-            if (fileType == "text/csv") {
-                data = await PredictService.predict_csv(formData);
+        if (!warning) {
+            console.log("chạy submit")
+            if (importExcel && file) {
+                const fileType=file.type;
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('fileName', file.name);
+                if (fileType == "text/csv") {
+                    data = await PredictService.predict_csv(formData);
 
+                }
+                // handle import excel
+                else {
+                    data = await PredictService.predict_xlsx(formData);
+                }
+            } else {
+                // handle input
+                data = await PredictService.predict(luuLuongXaKanak, soLieuMuaGiuaKanakAnKhe, luuLuongNuocDenHoAnKhe);
             }
-            // handle import excel
-            else {
-                data = await PredictService.predict_xlsx(formData);
-            }
-        } else {
-            // handle input
-            data = await PredictService.predict(luuLuongXaKanak, soLieuMuaGiuaKanakAnKhe, luuLuongNuocDenHoAnKhe)
+            setResult(data)
         }
-        setResult(data)
     }
     return (
         <>
