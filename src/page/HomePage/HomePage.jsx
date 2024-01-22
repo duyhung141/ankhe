@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useEffect} from "react"
 import Table from "../../component/Table/Table";
 import image1 from "../../assets/img/image 1.png"
 import image2 from "../../assets/img/image 2.png"
@@ -9,14 +9,15 @@ import * as PredictService from "../../service/PredictService";
 function HomePage() {
     const headers1 = [
         "Tên hồ",
-        "Thời điểm",
+        "Hiện tại",
+        "Thời điểm cập nhật lần cuối",
         "Mực nước thượng lưu (m)",
         "Mực nước dâng bình thường (m)",
         "Mực nước chết (m)",
         "Lưu lượng đến hồ (m3/s)",
-        "Lưu lượng xả (m3/s)",
-        "Lưu lượng xả qua đập tràn (m3/s)",
-        "Lưu lượng xả qua nhà máy (m3/s)",
+        "Tổng lượng xả (m3/s)",
+        "Tổng lượng xả qua đập tràn (m3/s)",
+        "Tổng lượng xả qua nhà máy (m3/s)",
         "Số cửa xả sâu",
         "Số cửa xả mặt"
     ]
@@ -33,40 +34,10 @@ function HomePage() {
         "Thời điểm t + 2",
         "Thời điểm t + 4",
         "Thời điểm t + 6",
-        "Thời điểm t + 12",
+        "Thời điểm t + 8",
     ]
 
-    const datas1 = [
-        {
-            "Tên hồ": "Kanak",
-            "Thời điểm": "2021-09-09 00:00:00",
-            "Mực nước thượng lưu (m)": "0.00",
-            "Mực nước dâng bình thường (m)": "0.00",
-            "Mực nước chết (m)": "0.00",
-            "Lưu lượng đến hồ (m3/s)": "0.00",
-            "Lưu lượng xả (m3/s)": "0.00",
-            "Lưu lượng xả qua đập tràn (m3/s)": "0.00",
-            "Lưu lượng xả qua nhà máy (m3/s)": "0.00",
-            "Số cửa xả sâu": "0",
-            "Số cửa xả mặt": "0"
-
-        },
-    ]
-
-    const datas2 = [
-        {
-            "Thời điểm": "2021-09-09 00:00:00",
-            "Lưu lượng đến hồ An Khê (m3/s)": "0.00",
-        },
-        {
-            "Thời điểm": "2021-09-09 00:00:00",
-            "Lưu lượng đến hồ An Khê (m3/s)": "0.00",
-        },
-        {
-            "Thời điểm": "2021-09-09 00:00:00",
-            "Lưu lượng đến hồ An Khê (m3/s)": "0.00",
-        },
-    ]
+    const [dataCrawl, setDataCrawl] = React.useState(null)
     const [luuLuongXaKanak, setLuuLuongXaKanak] = React.useState("");
     const [soLieuMuaGiuaKanakAnKhe, setSoLieuMuaGiuaKanakAnKhe] = React.useState("");
     const [luuLuongNuocDenHoAnKhe, setLuuLuongNuocDenHoAnKhe] = React.useState("");
@@ -92,6 +63,7 @@ function HomePage() {
             }
         }
     }
+
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         setFile(selectedFile);
@@ -103,7 +75,7 @@ function HomePage() {
         if (!warning) {
             console.log("chạy submit")
             if (importExcel && file) {
-                const fileType=file.type;
+                const fileType = file.type;
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('fileName', file.name);
@@ -122,21 +94,156 @@ function HomePage() {
             setResult(data)
         }
     }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await PredictService.crawl();
+            setDataCrawl(data);
+        };
+
+        fetchData();
+
+        const interval = setInterval(fetchData, 3600000);
+
+        return () => clearInterval(interval);
+    }, []);
     return (
         <>
             <div className="container mx-auto p-6">
                 <div className="">
                     <h3 className="text-start text-lg text-[#0891B2] font-medium py-1 md:text-3xl md:py-2">Thông tin vận
                         hành hồ chứa An Khê - Kanak</h3>
-                    <p>Đang cập nhật ...</p>
-                    {/*<Table headers={headers1} datas={datas1} colorHeader={"#0d9488"}/>*/}
+                    <table className="">
+                        <thead className="bg-[#0d9488]/30 text-[#0d9488]">
+                        <tr>
+                            {headers1.map((header, index) => (
+                                <th key={index} className="border border-gray-400 px-4 py-2">
+                                    {header}
+                                </th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr
+                            className="hover:bg-gray-100 hover:cursor-pointer"
+                        >
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                Kanak
+                            </td>
+                            {dataCrawl && dataCrawl?.data_KaNak_final.map((item, i) => (
+                                <>
+                                    <td
+                                        className="border border-gray-400 px-4 py-2"
+                                    >
+                                        {item}
+                                    </td>
+                                </>
+                            ))}
+
+                        </tr>
+                        <tr
+                            className="hover:bg-gray-100 hover:cursor-pointer"
+                        >
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                An Khê
+                            </td>
+                            {dataCrawl && dataCrawl?.data_AnKhe_final.map((item, i) => (
+                                <>
+                                    <td
+                                        className="border border-gray-400 px-4 py-2"
+                                    >
+                                        {item}
+                                    </td>
+                                </>
+                            ))}
+
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div className="mt-10">
                     <h3 className="text-start text-lg text-[#0891B2] font-medium py-1 md:text-3xl md:py-2">Dự báo lưu
                         lượng nước đến hồ chứa An Khê </h3>
-                    <p>Đang cập nhật ...</p>
-                    {/*<Table headers={headers2} datas={datas2} colorHeader={"#059669"}/>*/}
+                    <table className="">
+                        <thead className="bg-[#059669]/30 text-[#059669]">
+                        <tr>
+                            {headers2.map((header, index) => (
+                                <th key={index} className="border border-gray-400 px-4 py-2">
+                                    {header}
+                                </th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr
+                            className="hover:bg-gray-100 hover:cursor-pointer"
+                        >
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                Sau 2 giờ
+                            </td>
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                {dataCrawl?.predict_t2}
+                            </td>
+                        </tr>
+                        <tr
+                            className="hover:bg-gray-100 hover:cursor-pointer"
+                        >
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                Sau 4 giờ
+                            </td>
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                {dataCrawl?.predict_t4}
+                            </td>
+                        </tr>
+                        <tr
+                            className="hover:bg-gray-100 hover:cursor-pointer"
+                        >
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                Sau 6 giờ
+                            </td>
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                {dataCrawl?.predict_t6}
+                            </td>
+                        </tr>
+                        <tr
+                            className="hover:bg-gray-100 hover:cursor-pointer"
+                        >
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                Sau 8 giờ
+                            </td>
+                            <td
+                                className="border border-gray-400 px-4 py-2"
+                            >
+                                {dataCrawl?.predict_t8}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="my-10">
+                    <iframe width="720" height="480" className="mx-auto"
+                            src="https://embed.windy.com/embed2.html?lat=13.966&lon=108.632&detailLat=13.966&detailLon=108.632&width=1440&height=720&zoom=11&level=surface&overlay=rainAccu&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"
+                            frameBorder="0"></iframe>
                 </div>
 
                 <div className="">
@@ -228,8 +335,8 @@ function HomePage() {
                             </button>
                         </div>
                         {
-                            importExcel?
-                                (result  && <Table headers={headerExcel} datas={result}/>):
+                            importExcel ?
+                                (result && <Table headers={headerExcel} datas={result}/>) :
                                 (result && <Result data={result.data}/>)
                         }
 

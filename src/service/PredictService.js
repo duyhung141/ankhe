@@ -32,3 +32,12 @@ export const predict_csv = async (formData) => {
         throw error;
     }
 }
+
+export const crawl = async () => {
+    try {
+        const res = await axios.get(`http://192.168.1.7:5001/crawl`);
+        return res.data;
+    } catch (error) {
+        console.error('Error predicting with file:', error);
+    }
+}
