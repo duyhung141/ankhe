@@ -33,11 +33,20 @@ export const predict_csv = async (formData) => {
     }
 }
 
-export const crawl = async () => {
+export const crawl = async (ammountRain) => {
     try {
-        const res = await axios.get(`http://192.168.1.7:5001/crawl`);
+        const res = await axios.get(`http://127.0.0.1:5001/crawl?somua=${ammountRain}`);
         return res.data;
     } catch (error) {
         console.error('Error predicting with file:', error);
+    }
+}
+
+export const getAmountRain = async () => {
+    try {
+        const res = await axios.get(`http://127.0.0.1:5002/api/crawl`);
+        return res.data;
+    } catch (error) {
+        console.log('Error get amount rain:', error);
     }
 }

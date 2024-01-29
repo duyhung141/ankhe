@@ -37,11 +37,12 @@ function HomePage() {
         "Thời điểm t + 8",
     ]
 
+
     const [dataCrawl, setDataCrawl] = React.useState(null)
     const [luuLuongXaKanak, setLuuLuongXaKanak] = React.useState("");
     const [soLieuMuaGiuaKanakAnKhe, setSoLieuMuaGiuaKanakAnKhe] = React.useState("");
     const [luuLuongNuocDenHoAnKhe, setLuuLuongNuocDenHoAnKhe] = React.useState("");
-
+    const [amountRain, setAmountRain] = React.useState(null)
     const [importExcel, setImportExcel] = React.useState(null)
     const [file, setFile] = React.useState(null);
     const [result, setResult] = React.useState(null)
@@ -95,18 +96,32 @@ function HomePage() {
         }
     }
 
+    const getAmountRain = async () => {
+        const data = await PredictService.getAmountRain();
+        console.log(data)
+    }
+
     useEffect(() => {
         const fetchData = async () => {
-            const data = await PredictService.crawl();
+            const data = await PredictService.getAmountRain();
+            if (data) {
+                setAmountRain(data?.data?.t)
+            }
+        }
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await PredictService.crawl(amountRain);
             setDataCrawl(data);
+            console.log(data)
         };
 
         fetchData();
+    }, [amountRain]);
 
-        const interval = setInterval(fetchData, 3600000);
 
-        return () => clearInterval(interval);
-    }, []);
     return (
         <>
             <div className="container mx-auto p-6">
