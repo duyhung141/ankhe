@@ -36,7 +36,7 @@ function Result(props) {
                             className="font-normal">{data?.results_t4[0]}</span></p>
                         <p className="font-medium">6 giờ sau (thời điểm t + 3): <span
                             className="font-normal">{data?.results_t6[0]}</span></p>
-                        <p className="font-medium">Thời điểm t + 4: <span
+                        <p className="font-medium">8 giờ sau (thời điểm t + 4): <span
                             className="font-normal">{data?.results_t12[0]}</span></p>
                     </div>
 
