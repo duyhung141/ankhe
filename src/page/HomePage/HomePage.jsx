@@ -2,9 +2,11 @@ import React, {useEffect} from "react"
 import Table from "../../component/Table/Table";
 import image1 from "../../assets/img/image 1.png"
 import image2 from "../../assets/img/image 2.png"
-import Input from "../../component/Input/Input";
 import Result from "../../component/Result/Result";
 import * as PredictService from "../../service/PredictService";
+import {toast} from "react-toastify";
+import Toast from "../../component/Toast/Toast";
+import {useMutationHooks} from "../../hooks/useMutationHook";
 
 function HomePage() {
     const headers1 = [
@@ -31,13 +33,21 @@ function HomePage() {
         "Tổng lưu lượng xả Kanak thời điểm t (m3)",
         "Số liệu mưa giữa Kanak - An Khê tại thời điểm t (m3)",
         "Lưu lượng nước đến hồ An Khê thời điểm t (m3)",
-        "Thời điểm t + 1",
-        "Thời điểm t + 2",
-        "Thời điểm t + 3",
-        "Thời điểm t + 4",
+        "2 giờ sau",
+        "4 giờ sau",
+        "6 giờ sau",
+        "8 giờ sau",
     ]
-
-
+    const toastId = React.useRef(null);
+    const Toastobjects = {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+    };
     const [dataCrawl, setDataCrawl] = React.useState(null)
     const [luuLuongXaKanak, setLuuLuongXaKanak] = React.useState("");
     const [soLieuMuaGiuaKanakAnKhe, setSoLieuMuaGiuaKanakAnKhe] = React.useState("");
@@ -45,25 +55,8 @@ function HomePage() {
     const [amountRain, setAmountRain] = React.useState(null)
     const [importExcel, setImportExcel] = React.useState(null)
     const [file, setFile] = React.useState(null);
-    const [result, setResult] = React.useState(null)
-    const [warning, setWarning] = React.useState(false)
-    const handleWarning = () => {
-        console.log(warning)
-        if (importExcel) {
-            setWarning(false)
-            if (!file) {
-                setWarning(true)
-                alert("Bạn chưa chọn file excel")
-            }
-        } else {
-            setWarning(false)
-            if (!luuLuongXaKanak || !soLieuMuaGiuaKanakAnKhe || !luuLuongNuocDenHoAnKhe) {
-                console.log('vào đây', importExcel)
-                setWarning(true)
-                alert("Bạn chưa nhập đủ thông tin")
-            }
-        }
-    }
+    const [result, setResult] = React.useState()
+    const [warning, setWarning] = React.useState()
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -71,31 +64,48 @@ function HomePage() {
     };
     const handleSubmit = async (e) => {
         e.preventDefault()
-        handleWarning()
-        let data = {}
-        if (!warning) {
-            console.log("chạy submit")
-            if (importExcel && file) {
-                const fileType = file.type;
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('fileName', file.name);
-                if (fileType == "text/csv") {
-                    data = await PredictService.predict_csv(formData);
+        // handleWarning()
+        if (!luuLuongXaKanak || !soLieuMuaGiuaKanakAnKhe || !luuLuongNuocDenHoAnKhe) {
+            setWarning(true)
+            console.log("warning",warning)
+            return
+        }
+        let data = {};
+        data = await PredictService.predict(luuLuongXaKanak, soLieuMuaGiuaKanakAnKhe, luuLuongNuocDenHoAnKhe);
+        setResult(data)
+    }
 
-                }
-                // handle import excel
-                else {
-                    data = await PredictService.predict_xlsx(formData);
-                }
-            } else {
-                // handle input
-                data = await PredictService.predict(luuLuongXaKanak, soLieuMuaGiuaKanakAnKhe, luuLuongNuocDenHoAnKhe);
+
+    const handleSubmitExcel = async (e) => {
+        e.preventDefault()
+        let data = {}
+        if (file) {
+            const fileType = file.type;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('fileName', file.name);
+            if (fileType == "text/csv") {
+                data = await PredictService.predict_csv(formData);
+
             }
-            setResult(data)
+            // handle import excel
+            else {
+                data = await PredictService.predict_xlsx(formData);
+            }
+            setResult(data);
+        } else {
+            setWarning(true)
+            return
         }
     }
 
+    const handleChangeTypePredict = () => {
+        setResult(undefined)
+        setLuuLuongNuocDenHoAnKhe("")
+        setLuuLuongXaKanak("")
+        setSoLieuMuaGiuaKanakAnKhe("")
+        setImportExcel(!importExcel)
+    }
     const getAmountRain = async () => {
         const data = await PredictService.getAmountRain();
         console.log(data)
@@ -115,16 +125,29 @@ function HomePage() {
         const fetchData = async () => {
             const data = await PredictService.crawl(amountRain);
             setDataCrawl(data);
-            console.log(data)
         };
 
         fetchData();
     }, [amountRain]);
 
+    useEffect(() => {
+        if (warning) {
+            if (!toast.isActive(toastId.current)) {
+                console.log('vao day')
+                toastId.current = toast.warning(
+                    "Bạn chưa nhập đủ dữ liệu",
+                    Toastobjects
+                );
+            }
+            setWarning(false);
+        }
+    },[warning])
 
     return (
         <>
             <div className="container mx-auto p-6">
+                <Toast/>
+
                 <div className="">
                     <h3 className="text-start text-lg text-[#0891B2] font-medium py-1 md:text-3xl md:py-2">Thông tin vận
                         hành hồ chứa An Khê - Kanak</h3>
@@ -320,7 +343,7 @@ function HomePage() {
                                     type="checkbox"
                                     className="sr-only peer"
                                     value={importExcel}
-                                    onChange={() => setImportExcel(!importExcel)}
+                                    onChange={handleChangeTypePredict}
                                 />
                                 <div
                                     className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
@@ -338,22 +361,36 @@ function HomePage() {
                                         accept=".xlsx || .csv"
                                         onChange={handleFileChange}
                                     />
+                                    <div className="my-5">
+
+                                        <button
+                                            onClick={(e) => handleSubmitExcel(e)}
+                                            className="bg-[#6EE7B7] font-semibold px-6 py-4 rounded hover:bg-[#10b981] focus:border-2 focus:border-[#10b981]">Dự
+                                            đoán excel
+                                        </button>
+                                    </div>
                                 </div>
+                                {result && <Table headers={headerExcel} datas={result}/>}
 
                             </>
                         )}
-                        <div className="my-5">
-                            <button
-                                onClick={(e) => handleSubmit(e)}
-                                className="bg-[#6EE7B7] font-semibold px-6 py-4 rounded hover:bg-[#10b981] focus:border-2 focus:border-[#10b981]">Dự
-                                đoán
-                            </button>
-                        </div>
-                        {
-                            importExcel ?
-                                (result && <Table headers={headerExcel} datas={result}/>) :
-                                (result && <Result data={result.data}/>)
-                        }
+                        {!importExcel && (
+                            <>
+                                <div className="my-5">
+                                    <button
+                                        onClick={(e) => handleSubmit(e)}
+                                        className="bg-[#6EE7B7] font-semibold px-6 py-4 rounded hover:bg-[#10b981] focus:border-2 focus:border-[#10b981]">Dự
+                                        đoán
+                                    </button>
+                                </div>
+                                {result && <Result data={result?.data}/>}
+
+                            </>
+                        )}
+
+                        {/*{*/}
+                        {/*    importExcel ?*/}
+                        {/*}*/}
 
                     </div>
                 </div>

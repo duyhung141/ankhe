@@ -5,6 +5,7 @@ import Button from "./component/Button/Button";
 import Input from "./component/Input/Input";
 import Table from "./component/Table/Table";
 import HomePage from "./page/HomePage/HomePage";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
 

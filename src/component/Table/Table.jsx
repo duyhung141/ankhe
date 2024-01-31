@@ -3,8 +3,7 @@ import classNames from "classnames";
 
 function Table(props) {
     const {headers, datas, colorHeader} = props;
-    const lengthData = datas['result_x1'].length;
-    console.log(datas['result_x1'][1])
+    const lengthData = datas['result_x1']?.length;
     // console.log(datas)
     const headingClass = classNames({
         [`bg-[${colorHeader}]`]: true,
@@ -23,37 +22,37 @@ function Table(props) {
                         <td
                             className="border border-gray-400 px-4 py-2"
                         >
-                            {datas.result_x1[i]}
+                            {datas?.result_x1[i]}
                         </td>
                         <td
                             className="border border-gray-400 px-4 py-2"
                         >
-                            {datas.result_x2[i]}
+                            {datas?.result_x2[i]}
                         </td>
                         <td
                             className="border border-gray-400 px-4 py-2"
                         >
-                            {datas.result_x3[i]}
+                            {datas?.result_x3[i]}
                         </td>
                         <td
                             className="border border-gray-400 px-4 py-2"
                         >
-                            {datas.results_t2[i]}
+                            {datas?.results_t2[i]}
                         </td>
                         <td
                             className="border border-gray-400 px-4 py-2"
                         >
-                            {datas.results_t4[i]}
+                            {datas?.results_t4[i]}
                         </td>
                         <td
                             className="border border-gray-400 px-4 py-2"
                         >
-                            {datas.results_t6[i]}
+                            {datas?.results_t6[i]}
                         </td>
                         <td
                             className="border border-gray-400 px-4 py-2"
                         >
-                            {datas.results_t12[i]}
+                            {datas?.results_t12[i]}
                         </td>
                     </tr>
                 </>
