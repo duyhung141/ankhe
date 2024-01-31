@@ -30,13 +30,13 @@ function Result(props) {
                     </div>
 
                     <div className="text-start">
-                        <p className="font-medium">Thời điểm t + 2: <span
+                        <p className="font-medium">Thời điểm t + 1: <span
                             className="font-normal">{data.results_t2[0]}</span></p>
-                        <p className="font-medium">Thời điểm t + 4: <span
+                        <p className="font-medium">Thời điểm t + 2: <span
                             className="font-normal">{data.results_t4[0]}</span></p>
-                        <p className="font-medium">Thời điểm t + 6: <span
+                        <p className="font-medium">Thời điểm t + 3: <span
                             className="font-normal">{data.results_t6[0]}</span></p>
-                        <p className="font-medium">Thời điểm t + 8: <span
+                        <p className="font-medium">Thời điểm t + 4: <span
                             className="font-normal">{data.results_t12[0]}</span></p>
                     </div>
 

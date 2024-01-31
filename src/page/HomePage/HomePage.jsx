@@ -31,10 +31,10 @@ function HomePage() {
         "Tổng lưu lượng xả Kanak thời điểm t (m3)",
         "Số liệu mưa giữa Kanak - An Khê tại thời điểm t (m3)",
         "Lưu lượng nước đến hồ An Khê thời điểm t (m3)",
+        "Thời điểm t + 1",
         "Thời điểm t + 2",
+        "Thời điểm t + 3",
         "Thời điểm t + 4",
-        "Thời điểm t + 6",
-        "Thời điểm t + 8",
     ]
 
 
